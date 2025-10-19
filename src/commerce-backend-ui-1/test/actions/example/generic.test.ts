@@ -2,15 +2,11 @@
  * <license header>
  */
 
-import { Core } from '@adobe/aio-sdk'
-import type { ActionParams, ActionResponse, ActionErrorResponse } from '@actions/types'
-import * as exampleAction from '../../../actions/example/generic/index'
+import type { SuccessResponse, ErrorResponse } from '@adobe-commerce/aio-toolkit'
+import { exampleAction } from '../../../actions/example/generic/index'
 
-jest.mock('@adobe/aio-sdk', () => ({
-  Core: {
-    Logger: jest.fn()
-  }
-}))
+// Type for OpenWhisk action parameters
+type ActionParams = Record<string, unknown>
 
 const mockUserManagerGet = jest.fn()
 
@@ -20,79 +16,52 @@ jest.mock('@lib/user-manager', () => ({
   }))
 }))
 
-const mockLoggerInstance = {
-  info: jest.fn(),
-  debug: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn()
-}
-
 beforeEach(() => {
   jest.clearAllMocks()
-  ;(Core.Logger as jest.Mock).mockReturnValue(mockLoggerInstance)
 })
 
 const fakeParams: ActionParams = {
-  __ow_headers: { authorization: 'Bearer fake_token' }
+  __ow_headers: { authorization: 'Bearer fake_token' },
+  __ow_method: 'get'
 }
 
 describe('example/generic action', () => {
   describe('main function', () => {
     it('should be defined', () => {
-      expect(exampleAction.main).toBeInstanceOf(Function)
-    })
-
-    it('should use LOG_LEVEL parameter for logger', async () => {
-      mockUserManagerGet.mockReturnValue({ name: 'Guest' })
-
-      await exampleAction.main({ ...fakeParams, LOG_LEVEL: 'debug' })
-
-      expect(Core.Logger).toHaveBeenCalledWith('main', { level: 'debug' })
-    })
-
-    it('should default to info level when LOG_LEVEL is not provided', async () => {
-      mockUserManagerGet.mockReturnValue({ name: 'Guest' })
-
-      await exampleAction.main(fakeParams)
-
-      expect(Core.Logger).toHaveBeenCalledWith('main', { level: 'info' })
+      expect(exampleAction).toBeInstanceOf(Function)
     })
 
     it('should return success response with default Guest user', async () => {
       mockUserManagerGet.mockReturnValue({ name: 'Guest' })
 
-      const response = (await exampleAction.main(fakeParams)) as ActionResponse
+      const response = (await exampleAction(fakeParams)) as SuccessResponse
+      const body = response.body as Record<string, unknown>
 
-      expect(response).toEqual({
-        statusCode: 200,
-        body: {
-          message: 'Hello, Guest!'
-        }
-      })
+      expect(response.statusCode).toBe(200)
+      expect(body.message).toBe('Hello, Guest!')
+      expect(response.headers).toEqual({})
       expect(mockUserManagerGet).toHaveBeenCalledWith('Guest')
     })
 
     it('should return success response with custom name parameter', async () => {
       mockUserManagerGet.mockReturnValue({ name: 'John' })
 
-      const response = (await exampleAction.main({
+      const response = (await exampleAction({
         ...fakeParams,
         name: 'John'
-      })) as ActionResponse
+      })) as SuccessResponse
+      const body = response.body as Record<string, unknown>
 
-      expect(response).toEqual({
-        statusCode: 200,
-        body: {
-          message: 'Hello, John!'
-        }
-      })
+      expect(response.statusCode).toBe(200)
+      expect(body.message).toBe('Hello, John!')
+      expect(response.headers).toEqual({})
       expect(mockUserManagerGet).toHaveBeenCalledWith('John')
     })
 
     it('should trim name parameter', async () => {
       mockUserManagerGet.mockReturnValue({ name: 'Alice' })
 
-      await exampleAction.main({
+      await exampleAction({
         ...fakeParams,
         name: '  Alice  '
       })
@@ -101,7 +70,10 @@ describe('example/generic action', () => {
     })
 
     it('should return 400 when missing authorization header', async () => {
-      const response = (await exampleAction.main({})) as ActionErrorResponse
+      const response = (await exampleAction({
+        __ow_headers: {},
+        __ow_method: 'get'
+      })) as ErrorResponse
 
       expect(response).toEqual({
         error: {
@@ -113,46 +85,28 @@ describe('example/generic action', () => {
       })
     })
 
-    it('should return 400 when UserManager throws validation error for empty name', async () => {
-      mockUserManagerGet.mockImplementation(() => {
-        throw new Error('Name must be a non-empty string')
-      })
+    it('should default to Guest when name parameter is empty string', async () => {
+      mockUserManagerGet.mockReturnValue({ name: 'Guest' })
 
-      const response = (await exampleAction.main({
+      const response = (await exampleAction({
         ...fakeParams,
         name: ''
-      })) as ActionErrorResponse
+      })) as SuccessResponse
 
-      expect(response).toEqual({
-        error: {
-          statusCode: 400,
-          body: {
-            error: 'Invalid input: Name must be a non-empty string'
-          }
-        }
-      })
-      expect(mockLoggerInstance.warn).toHaveBeenCalledWith(
-        'UserManager validation error: Name must be a non-empty string'
-      )
+      expect(response.statusCode).toBe(200)
+      expect(mockUserManagerGet).toHaveBeenCalledWith('Guest')
     })
 
-    it('should return 500 when name is whitespace only (not caught by validation pattern)', async () => {
-      mockUserManagerGet.mockImplementation(() => {
-        throw new Error('Name cannot be empty or whitespace only')
-      })
+    it('should default to Guest when name is whitespace only', async () => {
+      mockUserManagerGet.mockReturnValue({ name: 'Guest' })
 
-      const response = (await exampleAction.main({
+      const response = (await exampleAction({
         ...fakeParams,
         name: '   '
-      })) as ActionErrorResponse
+      })) as SuccessResponse
 
-      // This error doesn't match the "Name must be" pattern, so it's treated as an unexpected error
-      expect(response.error.statusCode).toBe(500)
-      expect(response.error.body.error).toBe('Internal server error')
-      expect(mockLoggerInstance.error).toHaveBeenCalledWith(
-        'Unexpected error in generic action:',
-        'Name cannot be empty or whitespace only'
-      )
+      expect(response.statusCode).toBe(200)
+      expect(mockUserManagerGet).toHaveBeenCalledWith('Guest')
     })
 
     it('should return 500 when unexpected error occurs', async () => {
@@ -160,20 +114,16 @@ describe('example/generic action', () => {
         throw new Error('Database connection failed')
       })
 
-      const response = (await exampleAction.main(fakeParams)) as ActionErrorResponse
+      const response = (await exampleAction(fakeParams)) as ErrorResponse
 
       expect(response).toEqual({
         error: {
           statusCode: 500,
           body: {
-            error: 'Internal server error'
+            error: 'server error'
           }
         }
       })
-      expect(mockLoggerInstance.error).toHaveBeenCalledWith(
-        'Unexpected error in generic action:',
-        'Database connection failed'
-      )
     })
 
     it('should handle non-Error exceptions', async () => {
@@ -182,37 +132,10 @@ describe('example/generic action', () => {
         throw 'String error'
       })
 
-      const response = (await exampleAction.main(fakeParams)) as ActionErrorResponse
+      const response = (await exampleAction(fakeParams)) as ErrorResponse
 
-      expect(response).toEqual({
-        error: {
-          statusCode: 500,
-          body: {
-            error: 'Internal server error'
-          }
-        }
-      })
-      expect(mockLoggerInstance.error).toHaveBeenCalledWith(
-        'Unexpected error in generic action:',
-        'String error'
-      )
-    })
-
-    it('should log parameters at debug level', async () => {
-      mockUserManagerGet.mockReturnValue({ name: 'Guest' })
-
-      await exampleAction.main(fakeParams)
-
-      expect(mockLoggerInstance.debug).toHaveBeenCalled()
-    })
-
-    it('should log info messages', async () => {
-      mockUserManagerGet.mockReturnValue({ name: 'Guest' })
-
-      await exampleAction.main(fakeParams)
-
-      expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling the main action')
-      expect(mockLoggerInstance.info).toHaveBeenCalledWith('200: successful request')
+      expect(response.error.statusCode).toBe(500)
+      expect(response.error.body.error).toBe('server error')
     })
   })
 })
