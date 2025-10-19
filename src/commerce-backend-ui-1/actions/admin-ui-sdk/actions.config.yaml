@@ -1,0 +1,9 @@
+registration:
+  function: ../../../../build/actions/admin-ui-sdk/registration/index.js
+  web: 'yes'
+  runtime: nodejs:22
+  inputs:
+    LOG_LEVEL: debug
+  annotations:
+    require-adobe-auth: false
+    final: true
