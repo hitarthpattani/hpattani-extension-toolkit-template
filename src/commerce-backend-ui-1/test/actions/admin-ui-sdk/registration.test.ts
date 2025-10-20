@@ -4,7 +4,7 @@
 
 import type { SuccessResponse } from '@adobe-commerce/aio-toolkit'
 import { EXTENSION_ID } from '@actions/constants'
-import { registrationAction } from '../../../actions/admin-ui-sdk/registration/index'
+import { main as registrationAction } from '../../../actions/admin-ui-sdk/registration/index'
 
 // Type for OpenWhisk action parameters
 type ActionParams = Record<string, unknown>

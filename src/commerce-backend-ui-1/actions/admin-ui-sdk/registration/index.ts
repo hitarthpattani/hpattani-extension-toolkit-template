@@ -16,8 +16,8 @@
 import { EXTENSION_ID } from '@actions/constants'
 import { RuntimeAction, HttpMethod, RuntimeActionResponse, AdminUiSdk } from '@adobe-commerce/aio-toolkit'
 
-const registrationAction = RuntimeAction.execute(
-  'registration-action',
+export const main = RuntimeAction.execute(
+  'admin-ui-sdk-registration-action',
   [HttpMethod.GET, HttpMethod.POST],
   [],
   [],
@@ -33,5 +33,3 @@ const registrationAction = RuntimeAction.execute(
     return RuntimeActionResponse.success(registration);
   }
 );
-
-export { registrationAction }

@@ -16,8 +16,8 @@
 import { UserManager, User } from '@lib/user-manager'
 import { HttpMethod, RuntimeAction, RuntimeActionResponse } from '@adobe-commerce/aio-toolkit'
 
-const exampleAction = RuntimeAction.execute(
-  'generic-action',
+export const main = RuntimeAction.execute(
+  'example-generic-action',
   [HttpMethod.GET, HttpMethod.POST],
   [],
   ['authorization'],
@@ -37,5 +37,3 @@ const exampleAction = RuntimeAction.execute(
     )
   }
 )
-
-export { exampleAction }

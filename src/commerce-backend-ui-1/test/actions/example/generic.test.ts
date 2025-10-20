@@ -3,7 +3,7 @@
  */
 
 import type { SuccessResponse, ErrorResponse } from '@adobe-commerce/aio-toolkit'
-import { exampleAction } from '../../../actions/example/generic/index'
+import { main as exampleAction } from '../../../actions/example/generic/index'
 
 // Type for OpenWhisk action parameters
 type ActionParams = Record<string, unknown>
