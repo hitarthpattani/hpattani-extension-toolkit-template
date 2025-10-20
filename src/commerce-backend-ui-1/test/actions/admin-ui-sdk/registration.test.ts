@@ -73,10 +73,10 @@ describe('registration action', () => {
 
       expect(registration.menuItems).toEqual([
         {
-          id: `${EXTENSION_ID}::app_builder_extension`,
-          title: 'App Builder Extension',
+          id: `${EXTENSION_ID}::first`,
+          title: 'Adobe Commerce First App on App Builder',
           parent: `${EXTENSION_ID}::apps`,
-          sortOrder: 100
+          sortOrder: 1
         },
         {
           id: `${EXTENSION_ID}::apps`,
@@ -98,7 +98,7 @@ describe('registration action', () => {
       const registration = body.registration as Record<string, unknown>
 
       expect(registration.page).toEqual({
-        title: 'App Builder Extension'
+        title: 'Adobe Commerce First App on App Builder'
       })
     })
 
