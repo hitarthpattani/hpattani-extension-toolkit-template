@@ -1,10 +1,49 @@
-name: AIO App CI
+# CI/CD Stage Deployment Pipeline Configuration
+# This pipeline runs comprehensive quality checks and deploys to staging environment
+# Triggers on pushes to stage/staging branches with full CI/CD validation
+
+name: CI/CD Stage Deploy Pipeline
 
 on:
   push:
     branches:
-      - main
+      - stage
+
 jobs:
+  code-quality:
+    name: Code Quality
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node-version: ['20']
+        os: [ubuntu-latest]
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Lint Code (ESLint)
+        run: npm run lint:check
+
+      - name: Format Code (Prettier)
+        run: npm run format:check
+
+      - name: Tests (Unit Tests)
+        run: npm run test:ci
+
+      - name: Security Audit (Advisory)
+        run: npm run security:audit || true
+        continue-on-error: true
+
   deploy:
     name: Deploy to Stage
     runs-on: ${{ matrix.os }}
@@ -13,21 +52,28 @@ jobs:
       matrix:
         node-version: ['20']
         os: [ubuntu-latest]
+    timeout-minutes: 20
+    needs: [code-quality]
+
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - name: npm install
-        run: npm i
-      - name: Setup CLI
+
+      - name: Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Setup AIO CLI
         uses: adobe/aio-cli-setup-action@1.3.0
         with:
           os: ${{ matrix.os }}
           version: 10.x.x
-      - name: Auth
+
+      - name: Validate Authorization (AIO CLI)
         uses: adobe/aio-apps-action@3.3.0
         with:
           os: ${{ matrix.os }}
@@ -38,14 +84,16 @@ jobs:
           TECHNICALACCOUNTEMAIL: ${{ secrets.TECHNICALACCEMAIL_STAGE }}
           IMSORGID: ${{ secrets.IMSORGID_STAGE }}
           SCOPES: ${{ secrets.SCOPES_STAGE }}
-      - name: Build
+
+      - name: Build Application (AIO CLI)
         env:
           AIO_RUNTIME_NAMESPACE: ${{ secrets.AIO_RUNTIME_NAMESPACE_STAGE }}
         uses: adobe/aio-apps-action@3.3.0
         with:
           os: ${{ matrix.os }}
           command: build
-      - name: Deploy
+
+      - name: Deploy Application (AIO CLI)
         env:
           AIO_RUNTIME_NAMESPACE: ${{ secrets.AIO_RUNTIME_NAMESPACE_STAGE }}
           AIO_RUNTIME_AUTH: ${{ secrets.AIO_RUNTIME_AUTH_STAGE }}

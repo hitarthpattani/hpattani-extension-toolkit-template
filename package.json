@@ -3,9 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "@adobe-commerce/aio-experience-kit": "file:../aio-experience-kit",
-    "@adobe-commerce/aio-services-kit": "file:../aio-services-kit",
-    "@adobe-commerce/aio-toolkit": "file:../aio-toolkit",
+    "@adobe-commerce/aio-experience-kit": "^1.0.1",
+    "@adobe-commerce/aio-toolkit": "^1.0.2",
     "@adobe/aio-sdk": "^6",
     "@adobe/exc-app": "^1.3.0",
     "@adobe/generator-app-excshell": "^2.0.0",

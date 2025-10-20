@@ -14,7 +14,7 @@
  */
 
 import { EXTENSION_ID } from '@actions/constants'
-import { RuntimeAction, HttpMethod, RuntimeActionResponse, AdminUiSdk } from '@adobe-commerce/aio-toolkit'
+import { RuntimeAction, HttpMethod, RuntimeActionResponse } from '@adobe-commerce/aio-toolkit'  
 
 export const main = RuntimeAction.execute(
   'admin-ui-sdk-registration-action',
@@ -22,14 +22,26 @@ export const main = RuntimeAction.execute(
   [],
   [],
   async () => {
-    const adminUiSdk = new AdminUiSdk(EXTENSION_ID);
-    
-    adminUiSdk.addMenuItem('app_builder_extension', 'App Builder Extension', 100, 'apps');
-    adminUiSdk.addMenuSection('apps', 'Apps', 100);
-    adminUiSdk.addPage('App Builder Extension');
-    
-    const registration = await adminUiSdk.getRegistration();
-    
-    return RuntimeActionResponse.success(registration);
+    return RuntimeActionResponse.success({
+      registration: {
+        menuItems: [
+          {
+            id: `${EXTENSION_ID}::first`,
+            title: 'Adobe Commerce First App on App Builder',
+            parent: `${EXTENSION_ID}::apps`,
+            sortOrder: 1
+          },
+          {
+            id: `${EXTENSION_ID}::apps`,
+            title: 'Apps',
+            isSection: true,
+            sortOrder: 100
+          }
+        ],
+        page: {
+          title: 'Adobe Commerce First App on App Builder'
+        }
+      }
+    });
   }
 );
