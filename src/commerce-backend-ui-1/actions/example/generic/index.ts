@@ -21,8 +21,7 @@ export const main = RuntimeAction.execute(
   [HttpMethod.GET, HttpMethod.POST],
   [],
   ['authorization'],
-  async (params) => {
-
+  async params => {
     // Extract name parameter with proper validation and defaults
     const name: string = (params.name as string)?.trim() || 'Guest'
 
@@ -30,10 +29,8 @@ export const main = RuntimeAction.execute(
     const userManager = new UserManager()
     const user: User = userManager.get(name)
 
-    return RuntimeActionResponse.success(
-      {
-        message: `Hello, ${user.name}!`
-      }
-    )
+    return RuntimeActionResponse.success({
+      message: `Hello, ${user.name}!`
+    })
   }
 )

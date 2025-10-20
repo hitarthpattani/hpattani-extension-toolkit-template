@@ -53,10 +53,12 @@ describe('registration action', () => {
       }
 
       const response = (await registrationAction(params)) as SuccessResponse
+      const body = response.body as Record<string, unknown>
+      const registration = body.registration as Record<string, unknown>
 
       expect(response.statusCode).toBe(200)
-      expect(response.body).toHaveProperty('menuItems')
-      expect(response.body).toHaveProperty('page')
+      expect(registration).toHaveProperty('menuItems')
+      expect(registration).toHaveProperty('page')
     })
 
     it('should return correct menu items structure', async () => {
@@ -67,8 +69,9 @@ describe('registration action', () => {
 
       const response = (await registrationAction(params)) as SuccessResponse
       const body = response.body as Record<string, unknown>
+      const registration = body.registration as Record<string, unknown>
 
-      expect(body.menuItems).toEqual([
+      expect(registration.menuItems).toEqual([
         {
           id: `${EXTENSION_ID}::app_builder_extension`,
           title: 'App Builder Extension',
@@ -92,8 +95,9 @@ describe('registration action', () => {
 
       const response = (await registrationAction(params)) as SuccessResponse
       const body = response.body as Record<string, unknown>
+      const registration = body.registration as Record<string, unknown>
 
-      expect(body.page).toEqual({
+      expect(registration.page).toEqual({
         title: 'App Builder Extension'
       })
     })
@@ -106,13 +110,13 @@ describe('registration action', () => {
 
       const response = (await registrationAction(params)) as SuccessResponse
       const body = response.body as Record<string, unknown>
+      const registration = body.registration as Record<string, unknown>
 
       expect(response.statusCode).toBe(200)
-      expect(body.menuItems).toBeDefined()
-      expect(body.page).toBeDefined()
+      expect(registration.menuItems).toBeDefined()
+      expect(registration.page).toBeDefined()
     })
   })
-
 
   describe('extension ID usage', () => {
     it('should use EXTENSION_ID constant in menu item IDs', async () => {
@@ -123,7 +127,8 @@ describe('registration action', () => {
 
       const response = (await registrationAction(params)) as SuccessResponse
       const body = response.body as Record<string, unknown>
-      const menuItems = body.menuItems as Array<{ id: string; parent?: string }>
+      const registration = body.registration as Record<string, unknown>
+      const menuItems = registration.menuItems as Array<{ id: string; parent?: string }>
 
       expect(menuItems[0].id).toContain(EXTENSION_ID)
       expect(menuItems[0].parent).toContain(EXTENSION_ID)
@@ -146,5 +151,4 @@ describe('registration action', () => {
       expect(errorResponse.error.body.error).toContain('Invalid HTTP method')
     })
   })
-
 })

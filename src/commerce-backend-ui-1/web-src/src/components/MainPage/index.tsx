@@ -8,8 +8,8 @@ import type { MainPageProps } from './types'
 import { attach } from '@adobe/uix-guest'
 import { EXTENSION_ID } from '@web/types/constants'
 import { MainContainer } from '@adobe-commerce/aio-experience-kit'
-import HomeIcon from "@spectrum-icons/workflow/Home"
-import ShoppingCartIcon from "@spectrum-icons/workflow/ShoppingCart"
+import HomeIcon from '@spectrum-icons/workflow/Home'
+import ShoppingCartIcon from '@spectrum-icons/workflow/ShoppingCart'
 
 export const MainPage: React.FC<MainPageProps> = ({ runtime: _runtime, ims }) => {
   const [isLoading, setIsLoading] = useState(true)
@@ -30,21 +30,21 @@ export const MainPage: React.FC<MainPageProps> = ({ runtime: _runtime, ims }) =>
 
   const navigationButtons = [
     {
-      label: "Home",
-      path: "/",
-      icon: <HomeIcon size={"S"} gridArea="Home" marginEnd={"size-100"} />
-    }, 
+      label: 'Home',
+      path: '/',
+      icon: <HomeIcon size={'S'} gridArea="Home" marginEnd={'size-100'} />
+    },
     {
-      label: "Products",
-      path: "/products",
-      icon: <ShoppingCartIcon size={"S"} gridArea="Products" marginEnd={"size-100"} />
+      label: 'Products',
+      path: '/products',
+      icon: <ShoppingCartIcon size={'S'} gridArea="Products" marginEnd={'size-100'} />
     }
   ]
   const appRoutes = [
     {
       paths: ['/'],
       component: <Text>Home</Text>
-    }, 
+    },
     {
       paths: ['/products'],
       component: <Text>Products</Text>
@@ -59,16 +59,11 @@ export const MainPage: React.FC<MainPageProps> = ({ runtime: _runtime, ims }) =>
         </Flex>
       ) : (
         <View width="size-6000">
-          <MainContainer
-            buttons={navigationButtons}
-            routes={appRoutes}
-          />
+          <MainContainer buttons={navigationButtons} routes={appRoutes} />
         </View>
       )}
     </View>
   )
 
-  return (
-    renderContent()
-  )
+  return renderContent()
 }

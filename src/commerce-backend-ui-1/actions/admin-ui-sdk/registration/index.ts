@@ -14,7 +14,7 @@
  */
 
 import { EXTENSION_ID } from '@actions/constants'
-import { RuntimeAction, HttpMethod, RuntimeActionResponse } from '@adobe-commerce/aio-toolkit'  
+import { RuntimeAction, HttpMethod, RuntimeActionResponse } from '@adobe-commerce/aio-toolkit'
 
 export const main = RuntimeAction.execute(
   'admin-ui-sdk-registration-action',
@@ -42,6 +42,6 @@ export const main = RuntimeAction.execute(
           title: 'Adobe Commerce First App on App Builder'
         }
       }
-    });
+    })
   }
-);
+)
