@@ -75,9 +75,7 @@ export const MainPage: React.FC<MainPageProps> = ({ runtime: _runtime, ims }) =>
           <ProgressCircle size="L" aria-label="Loading…" isIndeterminate />
         </Flex>
       ) : (
-        <View width="size-6000">
-          {renderMainContainer()}
-        </View>
+        <View width="size-6000">{renderMainContainer()}</View>
       )}
     </View>
   )
